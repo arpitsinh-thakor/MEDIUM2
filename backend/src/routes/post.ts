@@ -45,6 +45,16 @@ postRouter.get('/get/:id',async (c) => {
         const post = await prisma.post.findUnique({
             where: {
                 id: id
+            },
+            select:{
+                content: true,
+                title: true,
+                id: true,
+                author: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
 
@@ -71,7 +81,7 @@ postRouter.post('/', async (c) => {
             data: {
                 title: body.title,
                 content: body.content,
-                authorId: userId
+                authorId: userId,
             }
         })
 
@@ -116,7 +126,18 @@ postRouter.get('/bulk', async (c) => {
     }).$extends(withAccelerate())
 
     try{
-        const posts = await prisma.post.findMany();
+        const posts = await prisma.post.findMany({
+            select:{
+                content: true,
+                title: true,
+                id: true,
+                author: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
+        });
 
         return c.json({posts})
     }
