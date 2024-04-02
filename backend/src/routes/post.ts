@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { PrismaClient } from '@prisma/client/edge'
 import { withAccelerate } from '@prisma/extension-accelerate'
 import { verify } from 'hono/jwt';
+import { createPostInput, updatePostInput } from '@arpit180302/medium-common';
 
 
 export const postRouter = new Hono<{
@@ -39,6 +40,7 @@ postRouter.get('/get/:id',async (c) => {
     }).$extends(withAccelerate())
 
     const id = c.req.param('id');
+    
     try{
         const post = await prisma.post.findUnique({
             where: {
@@ -60,6 +62,10 @@ postRouter.post('/', async (c) => {
 
     const body = await c.req.json();
     const userId = c.get('userId');
+    const {success} = createPostInput.safeParse(body)
+	if(!success){
+		return c.json({error: 'Invalid input'})
+	}
     try{
         const post = await prisma.post.create({
             data: {
@@ -82,6 +88,10 @@ postRouter.put('/',async (c) => {
     }).$extends(withAccelerate())
 
     const body = await c.req.json();
+    const {success} = updatePostInput.safeParse(body)
+	if(!success){
+		return c.json({error: 'Invalid input'})
+	}
     try{
         const post = await prisma.post.update({
             where: {
